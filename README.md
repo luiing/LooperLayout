@@ -5,7 +5,14 @@
 ![](/preview/aa_001.gif)
 
 ## USE
-```
+    implementation 'com.uis:adsorbent:0.1.1
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    
+    /** 加上私有仓储(未发jcenter)
+    maven {url 'https://dl.bintray.com/sweet/maven'}
+    
+```     
+        looper1.alwaysLooper = true //true:当有一个也播放，flase:当只有一个不播放(默认值)
         looper1.refreshDataChange(arrayOf("胡先煦新恋情曝光新","祖峰新片退出戛纳新","杭州多名保安被捅","张铭恩接机徐璐新"))
         looper1.setOnLooperItemListener(object :LooperLayout.OnLooperItemClickedListener{
             override fun onLooperItemClicked(position: Int, value: Any) {

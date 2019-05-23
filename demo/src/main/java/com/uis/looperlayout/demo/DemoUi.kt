@@ -7,7 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.bailian.yike.find.view.LooperLayout
+import com.uis.looperlayout.LooperLayout
 import kotlinx.android.synthetic.main.item_looper2.view.*
 import kotlinx.android.synthetic.main.ui_demo.*
 import kotlin.random.Random
@@ -20,19 +20,19 @@ class DemoUi :Activity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.ui_demo)
         looper1.refreshDataChange(arrayOf("胡先煦新恋情曝光新","祖峰新片退出戛纳新","杭州多名保安被捅","张铭恩接机徐璐新"))
-        looper1.setOnLooperItemListener(object :LooperLayout.OnLooperItemClickedListener{
+        looper1.setOnLooperItemClickedListener(object : LooperLayout.OnLooperItemClickedListener{
             override fun onLooperItemClicked(position: Int, value: Any) {
                 Log.e("demo","position= $position, value= ${value.toString()}")
             }
         })
 
 
-        looper2.setOnLooperLayoutAdapter(object :LooperLayout.LooperLayoutAdapter{
+        looper2.setOnLooperAdapter(object :LooperLayout.LooperAdapter{
             override fun createView(parent: ViewGroup): View? {
                 return LayoutInflater.from(parent.context).inflate(R.layout.item_looper2,null)
             }
 
-            override fun onBindView(view: View, value: Any) {
+            override fun onBindView(view: View, value: Any,position :Int) {
                 view.v_color.setBackgroundColor(Color.rgb(random.nextInt(),random.nextInt(),random.nextInt()))
                 view.tv_content.text = value.toString()
             }

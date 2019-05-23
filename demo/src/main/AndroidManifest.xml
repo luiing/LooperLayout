@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.uis.looperlayout.demo">
-  <application>
+  <application android:theme="@style/Theme.AppCompat.Light">
     <activity android:name=".DemoUi">
       <intent-filter>
         <action android:name="android.intent.action.VIEW"/>

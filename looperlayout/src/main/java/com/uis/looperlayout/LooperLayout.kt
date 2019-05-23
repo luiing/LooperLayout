@@ -1,4 +1,4 @@
-package com.bailian.yike.find.view
+package com.uis.looperlayout
 
 import android.animation.ValueAnimator
 import android.annotation.TargetApi
@@ -29,7 +29,7 @@ class LooperLayout :ViewGroup,View.OnClickListener{
     /** item点击事件监听器*/
     private var looperListener :OnLooperItemClickedListener? = null
     /** 适配自定义item，默认是textView*/
-    private var looperAdapter :LooperLayoutAdapter? = null
+    private var looperAdapter :LooperAdapter? = null
     private var isRefresh = false
 
     /** true:当有一个也播放，flase:当只有一个不播放*/
@@ -65,21 +65,21 @@ class LooperLayout :ViewGroup,View.OnClickListener{
             isRefresh = false
             var top = scrollY
             getChildAt((current) % 2)?.let {
-                bindItemView(it,data[current])
+                bindItemView(it,data[current],current)
                 it.layout(0, top, measuredWidth, top + it.measuredHeight)
                 top += it.measuredHeight
             }
             getChildAt((current+1) % 2)?.let {
-                bindItemView(it,data[(current + 1) % data.size])
+                bindItemView(it,data[(current + 1) % data.size],current)
                 it.layout(0, top, measuredWidth, top + it.measuredHeight)
                 top += it.measuredHeight
             }
         }
     }
 
-    private fun bindItemView(it :View,value :Any){
+    private fun bindItemView(it :View,value :Any, position: Int){
         if(looperAdapter != null) {
-            looperAdapter?.onBindView(it,value)
+            looperAdapter?.onBindView(it,value,position)
         }else {
             if(it is TextView) {
                 it.text = value.toString()
@@ -106,11 +106,11 @@ class LooperLayout :ViewGroup,View.OnClickListener{
         threads?.shutdownNow()
     }
 
-    fun setOnLooperItemListener(l :OnLooperItemClickedListener){
+    fun setOnLooperItemClickedListener(l :OnLooperItemClickedListener){
         looperListener = l
     }
 
-    fun setOnLooperLayoutAdapter(a :LooperLayoutAdapter){
+    fun setOnLooperAdapter(a :LooperAdapter){
         looperAdapter = a
         removeAllViews()
     }
@@ -178,9 +178,9 @@ class LooperLayout :ViewGroup,View.OnClickListener{
         fun onLooperItemClicked(position :Int,value: Any)
     }
 
-    interface LooperLayoutAdapter{
+    interface LooperAdapter{
         fun createView(parent :ViewGroup): View?
 
-        fun onBindView(view: View,value: Any)
+        fun onBindView(view: View,value: Any,position :Int)
     }
 }
