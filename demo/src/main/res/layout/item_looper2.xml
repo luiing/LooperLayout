@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_vertical">
-  <View android:id="@+id/v_color"
-      android:layout_width="30dp"
+  <com.facebook.drawee.view.SimpleDraweeView
+      android:id="@+id/v_color"
+      android:layout_width="match_parent"
+      app:actualImageScaleType="centerInside"
       android:layout_height="30dp"/>
   <TextView android:id="@+id/tv_content"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:gravity="center_vertical"
       android:padding="5dp"
+      android:visibility="gone"
   />
 </LinearLayout>
