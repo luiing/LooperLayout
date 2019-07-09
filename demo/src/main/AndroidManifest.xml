@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.uis.looperlayout.demo">
   <uses-permission android:name="android.permission.INTERNET"/>
-  <application>
+  <application android:label="Looper">
     <activity android:name=".DemoUi">
       <intent-filter>
         <action android:name="android.intent.action.VIEW"/>
