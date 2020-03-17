@@ -21,8 +21,8 @@ class LooperLayout :ViewGroup,View.OnClickListener{
     @TargetApi(21)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
     /** 包括animDelay时间*/
-    private val looperDelay = 3*1000L
-    private val animDelay = 1000L
+    val looperDelay = 3*1000L
+    val animDelay = 1000L
     private var threads: ScheduledExecutorService? = null
     private var data:Array<out Any> = arrayOf()
     private @Volatile var current = -1
@@ -70,7 +70,8 @@ class LooperLayout :ViewGroup,View.OnClickListener{
                 top += it.measuredHeight
             }
             getChildAt((current+1) % 2)?.let {
-                bindItemView(it,data[(current + 1) % data.size],current)
+                var index = (current + 1) % data.size
+                bindItemView(it,data[index],index)
                 it.layout(0, top, measuredWidth, top + it.measuredHeight)
                 top += it.measuredHeight
             }
