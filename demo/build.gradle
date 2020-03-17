@@ -24,7 +24,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:'+supportVer
+    api 'com.android.support:support-v4:' + supportVer
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    api "com.facebook.fresco:fresco:1.11.0"
     implementation project(':looperlayout')
 }
