@@ -51,13 +51,6 @@ class LooperLayout :ViewGroup,View.OnClickListener{
         if(childCount <= 0 && measuredWidth > 0) {
             initView()
         }
-        for (i in 0 until childCount) {
-            getChildAt(i).let {
-                val w = MeasureSpec.makeMeasureSpec(widthMeasureSpec, MeasureSpec.EXACTLY)
-                val h = MeasureSpec.makeMeasureSpec(heightMeasureSpec, MeasureSpec.EXACTLY)
-                it.measure(w, h)
-            }
-        }
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
@@ -85,6 +78,7 @@ class LooperLayout :ViewGroup,View.OnClickListener{
                 it.text = value.toString()
             }
         }
+        it.measure(MeasureSpec.makeMeasureSpec(measuredWidth, MeasureSpec.EXACTLY),MeasureSpec.makeMeasureSpec(measuredHeight, MeasureSpec.EXACTLY))
     }
 
     override fun onClick(v: View?) {
