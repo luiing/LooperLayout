@@ -41,7 +41,7 @@ class DemoUi :Activity(){
                 view.v_color.let{it as SimpleDraweeView
                     it.setImageURI(value.toString(),view.context)
                 }
-                view.tv_content.text = "position=$position"
+                view.tv_content.text = "position=$position $value"
             }
         })
         looper2.refreshDataChange(images)

@@ -8,7 +8,7 @@
 ![](/preview/aa_001.gif)
 
 ## USE
-    implementation 'com.uis:adsorbent:0.1.2
+    implementation 'com.uis:adsorbent:0.1.3
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     
 ```     
