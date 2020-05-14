@@ -1,14 +1,15 @@
 package com.uis.looperlayout
 
-import android.animation.ValueAnimator
 import android.annotation.TargetApi
 import android.content.Context
 import android.graphics.Color
+import android.support.v4.view.ViewCompat
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Scroller
 import android.widget.TextView
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledThreadPoolExecutor
@@ -20,20 +21,26 @@ class LooperLayout :ViewGroup,View.OnClickListener{
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
     @TargetApi(21)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
-    /** 包括animDelay时间*/
-    val looperDelay = 3*1000L
-    val animDelay = 1000L
+
+    private var mScroller = Scroller(context)
     private var threads: ScheduledExecutorService? = null
-    private var data:Array<out Any> = arrayOf()
+    private var data:Array<Any> = arrayOf()
     private @Volatile var current = -1
     /** item点击事件监听器*/
-    private var looperListener :OnLooperItemClickedListener? = null
+    private var looperListener :OnLooperItemClickedListener<Any>? = null
     /** 适配自定义item，默认是textView*/
-    private var looperAdapter :LooperAdapter? = null
+    private var looperAdapter :LooperAdapter<Any>? = null
     private var isRefresh = false
 
+    /** 包括animDelay时间*/
+    var looperDelay = 3*1000L
+    /** 滚动动画时间*/
+    var animDelay = 500L
     /** true:当有一个也播放，flase:当只有一个不播放*/
     var alwaysLooper = false
+    /** true->向上滚动,false->向下滚动*/
+    var animDirect = true
+    var enable = true
 
     init {
         /**支持xml布局预览*/
@@ -46,34 +53,66 @@ class LooperLayout :ViewGroup,View.OnClickListener{
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val widthSize = MeasureSpec.getSize(widthMeasureSpec)
-        var heightSize = MeasureSpec.getSize(heightMeasureSpec)
+        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
         setMeasuredDimension(widthSize, heightSize)
-        if(childCount <= 0 && measuredWidth > 0) {
-            initView()
-        }
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        if(current >= 0 && childCount > 0 && (changed || isRefresh) ) {
-            isRefresh = false
-            var top = scrollY
-            getChildAt((current) % 2)?.let {
-                bindItemView(it,data[current],current)
+        if(current >= 0) layout()
+    }
+
+    fun layout(){
+        for(i in childCount until 2){
+            val position = (current+i)%data.size
+            addView(createView(position))
+        }
+        var top = scrollY
+        for(i in 0 until childCount){
+            val position = (current+i)%data.size
+            getChildAt(i)?.let {
+                bindItemView(it,data[position],position)
                 it.layout(0, top, measuredWidth, top + it.measuredHeight)
-                top += it.measuredHeight
-            }
-            getChildAt((current+1) % 2)?.let {
-                var index = (current + 1) % data.size
-                bindItemView(it,data[index],index)
-                it.layout(0, top, measuredWidth, top + it.measuredHeight)
-                top += it.measuredHeight
+                top += it.measuredHeight*getAnimSign()
             }
         }
     }
 
+    override fun computeScroll() {
+        if(!mScroller.isFinished && mScroller.computeScrollOffset()){
+            val dy = mScroller.currY
+            scrollTo(0,dy)
+            ViewCompat.postInvalidateOnAnimation(this)
+        }else{
+            endScroll()
+        }
+    }
+
+    private fun startScroll(){
+        if(enable&&(data.size>1 || alwaysLooper)) {
+            isRefresh = true
+            val dy = measuredHeight*getAnimSign()
+            mScroller.startScroll(0,scrollY,0,dy,animDelay.toInt())
+            ViewCompat.postInvalidateOnAnimation(this)
+        }
+    }
+
+    private fun endScroll(){
+        if(mScroller.isFinished && isRefresh){
+            isRefresh = false
+            current = (current + 1).rem(data.size)
+            if(childCount > 1){
+                removeViewAt(0)
+                getChildAt(0).layout(0, 0, measuredWidth,   measuredHeight)
+                scrollTo(0,0)
+            }
+        }
+    }
+
+    private fun getAnimSign()=if(animDirect) 1 else -1
+
     private fun bindItemView(it :View,value :Any, position: Int){
         if(looperAdapter != null) {
-            looperAdapter?.onBindView(it,value,position)
+            looperAdapter?.onBindView(it, value,position)
         }else {
             if(it is TextView) {
                 it.text = value.toString()
@@ -93,7 +132,9 @@ class LooperLayout :ViewGroup,View.OnClickListener{
         if(threads == null || threads?.isShutdown == true){
             threads = ScheduledThreadPoolExecutor(2)
         }
-        threads?.scheduleWithFixedDelay(LooperRunnable(this),looperDelay,looperDelay,TimeUnit.MILLISECONDS)
+        threads?.scheduleWithFixedDelay({
+            startScroll()
+        },looperDelay,looperDelay, TimeUnit.MILLISECONDS)
     }
 
     override fun onDetachedFromWindow() {
@@ -101,53 +142,27 @@ class LooperLayout :ViewGroup,View.OnClickListener{
         threads?.shutdownNow()
     }
 
-    fun setOnLooperItemClickedListener(l :OnLooperItemClickedListener){
-        looperListener = l
+    @Suppress("UNCHECKED_CAST")
+    fun setOnLooperItemClickedListener(l :OnLooperItemClickedListener<out Any>){
+        looperListener = l as OnLooperItemClickedListener<Any>
     }
 
-    fun setOnLooperAdapter(a :LooperAdapter){
-        looperAdapter = a
+    @Suppress("UNCHECKED_CAST")
+    fun setOnLooperAdapter(adapter :LooperAdapter<out Any>){
+        looperAdapter = adapter as LooperAdapter<Any>
         removeAllViews()
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun refreshDataChange(array :Array<out Any>){
-        data = array
+        data = array as Array<Any>
         current = 0
-        refreshContent()
     }
 
-    private fun refreshContent(){
-        if(data.isNotEmpty()) {
-            isRefresh = true
-            requestLayout()
+    private fun createView(position: Int): View {
+        var v = looperAdapter?.let {
+            it.createView(this,it.getViewType(position))
         }
-    }
-
-    private fun startAnim(){
-        if(alwaysLooper ||  data.size >1) {
-            val anim = ValueAnimator.ofInt(scrollY, scrollY + measuredHeight).setDuration(animDelay)
-            anim.addUpdateListener {
-                val v = it.animatedValue as Int
-                scrollTo(0, v)
-                if (it.animatedFraction >= 1f) {
-                    scrollTo(0, 0)
-                    refreshContent()
-                    current = (current + 1).rem(data.size)
-                }
-            }
-            anim.start()
-        }
-    }
-
-    private fun initView(){
-        for(i in 0 until 2){
-            addView(createView())
-        }
-        isRefresh = true
-    }
-
-    private fun createView(): View {
-        var v = looperAdapter?.createView(this)
         /** 默认是TextView*/
         if(v == null) {
             v = TextView(context)
@@ -161,21 +176,15 @@ class LooperLayout :ViewGroup,View.OnClickListener{
         return v
     }
 
-    class LooperRunnable(var layout :LooperLayout) :Runnable{
-        override fun run() {
-            layout.handler?.post {
-                layout.startAnim()
-            }
-        }
+    interface OnLooperItemClickedListener<T: Any>{
+        fun onLooperItemClicked(position :Int,value: T)
     }
 
-    interface OnLooperItemClickedListener{
-        fun onLooperItemClicked(position :Int,value: Any)
-    }
+    interface LooperAdapter<T:Any> {
+        fun createView(parent :ViewGroup,viewType:Int): View?
 
-    interface LooperAdapter{
-        fun createView(parent :ViewGroup): View?
+        fun getViewType(position: Int):Int = 0
 
-        fun onBindView(view: View,value: Any,position :Int)
+        fun onBindView(view: View,value: T,position :Int)
     }
 }

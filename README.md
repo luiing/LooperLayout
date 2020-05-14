@@ -2,16 +2,20 @@
 <li>适用于上下滚动的通知展示，内部已实现定时任务，会自动创建和回收，无须手动处理</li>
 <li>支持自定义展示内容，默认只现实一个TextView(xml布局预览为此效果)</li>
 <li>当有一个数据时也支持滚动播放，需配置（默认关闭此功能）</li>
+<li>支持轮播时间设定，支持轮播关闭，支持动画向上和向下，支持多种布局</li>
+
 
 ## Preview
 
 ![](/preview/aa_001.gif)
 
 ## USE
-    implementation 'com.uis:adsorbent:0.1.3
+    implementation 'com.uis:adsorbent:0.3.0
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     
-```     
+```
+        looper1.animDirect = false//true->向上滚动，false->向下滚动
+        looper1.animDelay = 2000//滚动动画时间ms
         looper1.alwaysLooper = true //true:当有一个也播放，flase:当只有一个不播放(默认值)
         looper1.refreshDataChange(arrayOf("胡先煦新恋情曝光新","祖峰新片退出戛纳新","杭州多名保安被捅","张铭恩接机徐璐新"))
         looper1.setOnLooperItemClickedListener(object :LooperLayout.OnLooperItemClickedListener{
@@ -21,16 +25,14 @@
         })
 
         /** 自定义布局*/
-        looper2.setOnLooperAdapter(object :LooperLayout.LooperAdapter{
-            override fun createView(parent: ViewGroup): View? {
+        looper2.setOnLooperAdapter(object :LooperLayout.LooperAdapter<String>{
+            override fun createView(parent: ViewGroup, viewType: Int): View? {
                 return LayoutInflater.from(parent.context).inflate(R.layout.item_looper2,null)
             }
 
-            override fun onBindView(view: View, value: Any, position: Int) {
-                view.v_color.let{it as SimpleDraweeView
-                    it.setImageURI(value.toString(),view.context)
-                }
-                view.tv_content.text = "position=$position"
+            override fun onBindView(view: View, value: String, position: Int) {
+                view.v_color2.setImageURI(value)
+                view.tv_content.text = "position=$position $value"
             }
         })
         looper2.refreshDataChange(images)
