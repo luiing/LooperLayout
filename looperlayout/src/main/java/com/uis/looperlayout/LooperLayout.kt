@@ -35,7 +35,7 @@ class LooperLayout :ViewGroup,View.OnClickListener{
     /** 包括animDelay时间*/
     var looperDelay = 3*1000L
     /** 滚动动画时间*/
-    var animDelay = 500L
+    var animDelay = 1000L
     /** true:当有一个也播放，flase:当只有一个不播放*/
     var alwaysLooper = false
     /** true->向上滚动,false->向下滚动*/
@@ -155,6 +155,8 @@ class LooperLayout :ViewGroup,View.OnClickListener{
 
     @Suppress("UNCHECKED_CAST")
     fun refreshDataChange(array :Array<out Any>){
+        mScroller.abortAnimation()
+        removeAllViews()
         data = array as Array<Any>
         current = 0
     }

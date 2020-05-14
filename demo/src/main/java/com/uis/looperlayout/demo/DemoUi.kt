@@ -66,6 +66,11 @@ class DemoUi :Activity(){
                 view.tv_content.text = "position=$position $value"
             }
         })
+        looper2.setOnLooperItemClickedListener(object : LooperLayout.OnLooperItemClickedListener<String>{
+            override fun onLooperItemClicked(position: Int, value: String) {
+                looper1.refreshDataChange(data)
+            }
+        })
         looper2.refreshDataChange(images)
 
     }
