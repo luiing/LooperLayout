@@ -24,6 +24,10 @@ class DemoUi :Activity(){
         }
         super.onCreate(savedInstanceState)
         setContentView(R.layout.ui_demo)
+        bt_refresh.setOnClickListener {
+            //looper1.refreshDataChange(arrayOf("草草马马妮妮","First man,First woman","铜人大战"))
+            looper2.refreshDataChange(images)
+        }
         val data = arrayOf("胡先煦新恋情曝光新","祖峰新片退出戛纳新","杭州多名保安被捅","张铭恩接机徐璐新")
         looper1.setOnLooperAdapter(object :LooperLayout.LooperAdapter<String>{
             override fun getViewType(position: Int): Int {

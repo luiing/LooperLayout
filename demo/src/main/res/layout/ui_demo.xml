@@ -9,14 +9,16 @@
         android:id="@+id/looper1"
         android:layout_width="match_parent"
         android:layout_height="32dp">
-
     </com.uis.looperlayout.LooperLayout>
 
     <com.uis.looperlayout.LooperLayout
         android:id="@+id/looper2"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:layout_marginTop="30dp"
-    >
+        android:layout_marginTop="30dp">
     </com.uis.looperlayout.LooperLayout>
+    <Button android:id="@+id/bt_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="刷新数据"/>
 </LinearLayout>
