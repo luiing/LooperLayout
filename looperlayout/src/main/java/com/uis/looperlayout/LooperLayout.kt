@@ -27,9 +27,9 @@ class LooperLayout :ViewGroup,View.OnClickListener{
     private var data:Array<Any> = arrayOf()
     private @Volatile var current = -1
     /** item点击事件监听器*/
-    private var looperListener :OnLooperItemClickedListener<Any>? = null
+    private var mListener :OnLooperItemClickedListener<Any>? = null
     /** 适配自定义item，默认是textView*/
-    private var looperAdapter :LooperAdapter<Any>? = null
+    private var mAdapter :LooperAdapter<Any>? = null
     private var isRefresh = false
 
     /** 包括animDelay时间*/
@@ -58,10 +58,10 @@ class LooperLayout :ViewGroup,View.OnClickListener{
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        if(current >= 0) layout()
+        if(current >= 0 && data.isNotEmpty()) layout()
     }
 
-    fun layout(){
+    private fun layout(){
         for(i in childCount until 2){
             val position = (current+i)%data.size
             addView(createView(position))
@@ -88,7 +88,7 @@ class LooperLayout :ViewGroup,View.OnClickListener{
     }
 
     private fun startScroll(){
-        if(enable&&(data.size>1 || alwaysLooper)) {
+        if(enable && (data.size>1 || alwaysLooper)) {
             isRefresh = true
             val dy = measuredHeight*getAnimSign()
             mScroller.startScroll(0,scrollY,0,dy,animDelay.toInt())
@@ -102,7 +102,7 @@ class LooperLayout :ViewGroup,View.OnClickListener{
             current = (current + 1).rem(data.size)
             if(childCount > 1){
                 removeViewAt(0)
-                getChildAt(0).layout(0, 0, measuredWidth,   measuredHeight)
+                getChildAt(0)?.layout(0, 0, measuredWidth,   measuredHeight)
                 scrollTo(0,0)
             }
         }
@@ -111,8 +111,10 @@ class LooperLayout :ViewGroup,View.OnClickListener{
     private fun getAnimSign()=if(animDirect) 1 else -1
 
     private fun bindItemView(it :View,value :Any, position: Int){
-        if(looperAdapter != null) {
-            looperAdapter?.onBindView(it, value,position)
+        if(mAdapter != null) {
+            kotlin.runCatching {
+                mAdapter?.onBindView(it, value, position)
+            }.exceptionOrNull()?.printStackTrace()
         }else {
             if(it is TextView) {
                 it.text = value.toString()
@@ -122,8 +124,8 @@ class LooperLayout :ViewGroup,View.OnClickListener{
     }
 
     override fun onClick(v: View?) {
-        if(current >= 0){
-            looperListener?.onLooperItemClicked(current,data[current])
+        if(current >= 0 && data.isNotEmpty()){
+            mListener?.onLooperItemClicked(current,data[current])
         }
     }
 
@@ -144,25 +146,26 @@ class LooperLayout :ViewGroup,View.OnClickListener{
 
     @Suppress("UNCHECKED_CAST")
     fun setOnLooperItemClickedListener(l :OnLooperItemClickedListener<out Any>){
-        looperListener = l as OnLooperItemClickedListener<Any>
+        mListener = l as OnLooperItemClickedListener<Any>
     }
 
     @Suppress("UNCHECKED_CAST")
     fun setOnLooperAdapter(adapter :LooperAdapter<out Any>){
-        looperAdapter = adapter as LooperAdapter<Any>
+        mAdapter = adapter as LooperAdapter<Any>
         removeAllViews()
     }
 
     @Suppress("UNCHECKED_CAST")
     fun refreshDataChange(array :Array<out Any>){
+        isRefresh = false
         mScroller.abortAnimation()
-        removeAllViews()
         data = array as Array<Any>
         current = 0
+        removeAllViews()
     }
 
     private fun createView(position: Int): View {
-        var v = looperAdapter?.let {
+        var v = mAdapter?.let {
             it.createView(this,it.getViewType(position))
         }
         /** 默认是TextView*/
